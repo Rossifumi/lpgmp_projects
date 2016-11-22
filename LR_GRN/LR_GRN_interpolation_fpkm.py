@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 # from scipy import stats
-from scipy.interpolate import interp1d
+#from scipy.interpolate import interp1d
+from scipy.interpolate import splev, splrep
 from scipy import io as spio
 
 df_bna = pd.read_csv("/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/Bna_exp_fpkm.csv",header=None,index_col=0)
@@ -22,8 +23,12 @@ computed_results = computed_results.fillna(0)
 
 for index, row in df_bna_filter.iterrows():
     measures = row
-    cubic_interp = interp1d(measured_time,measures,kind='cubic')
-    computes = cubic_interp(computed_time)
+    # cubic_interp = interp1d(measured_time,measures,kind='quadratic')
+    # computes = cubic_interp(computed_time)
+
+    bspline_interp = splrep(measured_time,measures,w=None, xb=None, xe=None, k=3, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
+    computes = splev(computed_time,bspline_interp)
+    
     computed_results.set_value(index=index,col=computed_time,value=computes)
     
 # save results
