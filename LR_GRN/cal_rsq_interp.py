@@ -6,6 +6,7 @@ Created on Thu Nov 24 15:58:04 2016
 @author: Jiajia
 """
 
+import sys
 import numpy as np
 import random
 from scipy.interpolate import interp1d
@@ -23,10 +24,12 @@ def cal_rsq_interp(mtime,mdata,ctime,prop,iter_num):
         #repeat sampling
         for i in range(iter_num):
             m = len(mtime)
-            n = round(prop * m)
-            sample_loc = np.sort(random.sample(range(m),n))
+            n = round(prop * m) - 2
+            sample_loc = np.sort(np.concatenate(([0,m-1],random.sample(range(1,m-1),n)),axis=0))
+            #print(sample_loc)
             mtime_sp = mtime[sample_loc]
             mdata_sp = mdata[sample_loc]
+            #print(mtime_sp)
             
             #quadratic
             quadratic_interp = interp1d(mtime_sp,mdata_sp,kind='quadratic')
@@ -37,11 +40,11 @@ def cal_rsq_interp(mtime,mdata,ctime,prop,iter_num):
             cubic_computes = cubic_interp(ctime)
             
             #B-Spline k=2
-            bspline_k2_interp = splrep(mtime,mdata,w=None, xb=None, xe=None, k=2, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
+            bspline_k2_interp = splrep(mtime_sp,mdata_sp,w=None, xb=None, xe=None, k=2, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
             bspline_k2_computes = splev(ctime,bspline_k2_interp)
             
             #B-Spline k=3
-            bspline_k3_interp = splrep(mtime,mdata,w=None, xb=None, xe=None, k=3, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
+            bspline_k3_interp = splrep(mtime_sp,mdata_sp,w=None, xb=None, xe=None, k=3, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
             bspline_k3_computes = splev(ctime,bspline_k3_interp)
           
             #fetching loci for non sampled data
@@ -54,8 +57,8 @@ def cal_rsq_interp(mtime,mdata,ctime,prop,iter_num):
             #fetching loci for computed data
             ctime_list = ctime.tolist()
             computed_loc = []
-            for i in range(len(mtime_nsp)):
-                computed_loc.append(ctime_list.index(mtime_nsp[i]))
+            for j in range(len(mtime_nsp)):
+                computed_loc.append(ctime_list.index(mtime_nsp[j]))
             
             #test set, computed data
             test_computed_quadratic = quadratic_computes[computed_loc]
@@ -70,12 +73,20 @@ def cal_rsq_interp(mtime,mdata,ctime,prop,iter_num):
             rsq_spline_k3.append(sum(np.square(test_ori - test_computed_bspline_k3)))
         
         #print average output of sampling
-        print('Average root square for quadratic regression: %d' % np.average(rsq_quadratic))
-        print('Average root square for cubic regression: %d' % np.average(rsq_cubic))
-        print('Average root square for B-Spline k2 regression: %d' % np.average(rsq_spline_k2))
-        print('Average root square for B-Spline k3 regression: %d' % np.average(rsq_spline_k3))
-            
+        #print('Average root square for quadratic regression: %d' % np.average(rsq_quadratic))
+        #print('Average root square for cubic regression: %d' % np.average(rsq_cubic))
+        #print('Average root square for B-Spline k2 regression: %d' % np.average(rsq_spline_k2))
+        #print('Average root square for B-Spline k3 regression: %d' % np.average(rsq_spline_k3))
+         
+        #return results
+        quadratic_avg = np.average(rsq_quadratic)
+        cubic_avg = np.average(rsq_cubic)
+        spline_k2_avg = np.average(rsq_spline_k2)
+        spline_k3_avg = np.average(rsq_spline_k3)
+        return [quadratic_avg, cubic_avg, spline_k2_avg, spline_k3_avg]
+        
     except AttributeError:
-        break
+        sys.exit()
+    
 
 
