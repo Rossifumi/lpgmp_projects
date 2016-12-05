@@ -14,6 +14,8 @@ df_bna.columns = ["0h","0.5h","1h","2h","3h","4h","5h","6h","8h","10h","12h","14
 
 df_bna_filter = df_bna[(df_bna.sum(axis=1)>24) & (df_bna.sum(axis=1)<48000)]
 
+df_bna_filter.to_csv('/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/Bna_exp_fpkm_filter.csv',encoding='utf-8')
+
 # interp1d with step 0.5h
 measured_time = np.array([0,0.5,1,2,3,4,5,6,8,10,12,14,16,20,24,28,32,36,40,44,48,56,64,72])
 computed_time = np.arange(0,72.5,0.5)
@@ -26,7 +28,7 @@ for index, row in df_bna_filter.iterrows():
     # cubic_interp = interp1d(measured_time,measures,kind='quadratic')
     # computes = cubic_interp(computed_time)
 
-    bspline_interp = splrep(measured_time,measures,w=None, xb=None, xe=None, k=3, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
+    bspline_interp = splrep(measured_time,measures,w=None, xb=None, xe=None, k=2, task=0, s=None, t=None, full_output=0, per=0, quiet=1)
     computes = splev(computed_time,bspline_interp)
     
     computed_results.set_value(index=index,col=computed_time,value=computes)
@@ -35,5 +37,5 @@ for index, row in df_bna_filter.iterrows():
 spio.savemat('/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/Bna_exp_fpkm.mat',{'computed_results': computed_results, 'df_bna_filter': df_bna_filter, 'df_bna': df_bna})
 
 # write csv
-computed_results.to_csv('/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/Bna_exp_fpkm_filter_interp.csv',encoding='utf-8')
+computed_results.to_csv('/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/Bna_exp_fpkm_filter_interp_spline_k2.csv',encoding='utf-8')
 

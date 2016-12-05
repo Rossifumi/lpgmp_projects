@@ -79,6 +79,6 @@ spline_k3_plot = np.sort(rsq_spline_k3_fin)[round(k/20):k-round(k/20)]
 data_to_plot = [cubic_plot, spline_k2_plot, spline_k3_plot]
 xlabels = ['cubic','spline k2','spline k3']
 
-boxplot_lpgmp.boxplot_lpgmp(data_to_plot,xlabels,15,10,'/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/sample_boxplot.png')
+boxplot_lpgmp.boxplot_lpgmp(data_to_plot,xlabels,15,10,'/Users/Jiajia/WORK/projects/LR_GN/diceseq_exp/sample_boxplot.pdf')
 
 
